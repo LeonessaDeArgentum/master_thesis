@@ -1,0 +1,26 @@
+trimmomatic SE -phred33 -threads 4 S_WH7803_5m.fastq S_WH7803_5m_trim.fastq -summary S_WH7803_5m_trimsummary ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+trimmomatic SE -phred33 -threads 4 S_WH7803_30m.fastq S_WH7803_30m_trim.fastq -summary S_WH7803_30m_trimsummary ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+trimmomatic SE -phred33 -threads 4 S_WH7803_60m.fastq S_WH7803_60m_trim.fastq -summary S_WH7803_60m_trimsummary ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+trimmomatic SE -phred33 -threads 4 S_WH7803_120m.fastq S_WH7803_120m_trim.fastq -summary S_WH7803_120m_trimsummary ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+bowtie-build GCF_000063505.1_ASM6350v1_genomic.fna indeks7
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks7 S_WH7803_5m_trim.fastq > mapped7_5.sam
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks7 S_WH7803_30m_trim.fastq > mapped7_30.sam
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks7 S_WH7803_60m_trim.fastq > mapped7_60.sam
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks7 S_WH7803_120m_trim.fastq > mapped7_120.sam
+samtools view -S -b mapped7_5.sam > temp.bam
+samtools sort temp.bam -o mapped7_5.bam
+samtools view -S -b mapped7_30.sam > temp.bam
+samtools sort temp.bam -o mapped7_30.bam
+samtools view -S -b mapped7_60.sam > temp.bam
+samtools sort temp.bam -o mapped7_60.bam
+samtools view -S -b mapped7_120.sam > temp.bam
+samtools sort temp.bam -o mapped7_120.bam
+samtools index -b mapped7_5.bam
+bamCoverage -b mapped7_5.bam -o Synechococcus_WH7803_5.bw -of bigwig -v --normalizeUsing CPM
+samtools index -b mapped7_30.bam
+bamCoverage -b mapped7_30.bam -o Synechococcus_WH7803_30.bw -of bigwig -v --normalizeUsing CPM
+samtools index -b mapped7_60.bam
+bamCoverage -b mapped7_60.bam -o Synechococcus_WH7803_60.bw -of bigwig -v --normalizeUsing CPM
+samtools index -b mapped7_120.bam
+bamCoverage -b mapped7_120.bam -o Synechococcus_WH7803_120.bw -of bigwig -v --normalizeUsing CPM
+python tsstobed.py -i s7803_merged_2014-04-03_00_47_05.s2 -o Synechococcus_WH7803_TSS.bed

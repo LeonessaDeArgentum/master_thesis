@@ -1,0 +1,5 @@
+# reads processed: 32653011
+# reads with at least one alignment: 12240965 (37.49%)
+# reads that failed to align: 20412046 (62.51%)
+# reads with alignments suppressed due to -m: 11973981 (36.67%)
+Reported 266984 alignments

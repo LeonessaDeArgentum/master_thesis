@@ -1,0 +1,49 @@
+trimmomatic SE -phred33 -summary station_trimsummary station.fastq station_trim.fastq ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:30
+trimmomatic SE -phred33 -summary sigB_trimsummary sigB.fastq sigB_WT_trim.fastq ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:30
+trimmomatic SE -phred33 -summary prfA_trimsummary prfA.fastq  prfA_trim.fastq ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:30
+trimmomatic SE -phred33 -summary log37_trimsummary log37.fastq  log37_trim.fastq ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:30
+trimmomatic SE -phred33 -summary log30_trimsummary log30.fastq  log30_trim.fastq ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:30
+trimmomatic SE -phred33 -summary hypoxia_trimsummary hypoxia.fastq  hypoxia_trim.fastq ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:30
+bowtie-build GCF_000196035.1_ASM19603v1_genomic.fna indeks
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks hypoxia_trim.fastq > hypoxia.sam
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks log30_trim.fastq > log30.sam
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks log37_trim.fastq > log37.sam
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks prfA_trim.fastq > prfA.sam
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks sigB_WT_trim.fastq > sigB.sam
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks station_trim.fastq > station.sam
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks merged.fastq > merged.sam
+samtools view -S -b hypoxia.sam > temp.bam
+samtools sort temp.bam -o hypoxia.bam
+samtools view -S -b log30.sam > temp.bam
+samtools sort temp.bam -o log30.bam
+samtools view -S -b log37.sam > temp.bam
+samtools sort temp.bam -o log37.bam
+samtools view -S -b prfA.sam > temp.bam
+samtools sort temp.bam -o prfA.bam
+samtools view -S -b sigB.sam > temp.bam
+samtools sort temp.bam -o sigB.bam
+samtools view -S -b station.sam > temp.bam
+samtools sort temp.bam -o station.bam
+samtools view -S -b merged.sam > temp.bam
+samtools sort temp.bam -o merged.bam
+samtools index -b hypoxia.bam
+bamCoverage -b hypoxia.bam -o hypoxia.bw -of bigwig -v --normalizeUsing CPM
+samtools index -b log30.bam
+bamCoverage -b log30.bam -o log30.bw -of bigwig -v --normalizeUsing CPM
+samtools index -b log37.bam
+bamCoverage -b log37.bam -o log37.bw -of bigwig -v --normalizeUsing CPM
+samtools index -b prfA.bam
+bamCoverage -b prfA.bam -o prfA.bw -of bigwig -v --normalizeUsing CPM
+samtools index -b sigB.bam
+bamCoverage -b sigB.bam -o sigB.bw -of bigwig -v --normalizeUsing CPM
+samtools index -b station.bam
+bamCoverage -b station.bam -o station.bw -of bigwig -v --normalizeUsing CPM
+samtools index -b merged.bam
+bamCoverage -b merged.bam -o merged.bw -of bigwig -v --normalizeUsing CPM
+python tsstobed.py -i Lis_mon_30c_2014-04-03_00_47_15.s2 -o L_monocytogenes_log30_TSS.bed
+python tsstobed.py -i Lis_mon_37c_2014-04-03_00_47_14.s2 -o L_monocytogenes_log37_TSS.bed
+python tsstobed.py -i Lis_mon_hypoxia_2014-04-03_00_47_21.s2  -o L_monocytogenes_hypoxia_TSS.bed
+python tsstobed.py -i Lis_mon_merged_2014-04-03_00_47_17.s2 -o L_monocytogenes_merged_TSS.bed
+python tsstobed.py -i Lis_mon_prfA_2014-04-03_00_47_21.s2 -o L_monocytogenes_prfA_TSS.bed
+python tsstobed.py -i Lis_mon_stat_2014-04-03_00_47_25.s2 -o L_monocytogenes_stationary_TSS.bed
+python tsstobed.py -i  Lis_mon_sigB_2014-04-03_00_47_20.s2 -o L_monocytogenes_sigB_TSS.bed

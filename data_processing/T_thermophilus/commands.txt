@@ -1,0 +1,8 @@
+trimmomatic PE -phred33 WT_1.txt WT_2.txt WT_1_trim.fastq drop1.fastq WT_2_trim.fastq drop2.fastq -trimlog T_termophilus_trimlog -summary T_termophilus_trimsummary ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+bowtie-build GCF_000008125.1_ASM812v1_genomic.fna indeks
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks -1  WT_1_trim.fastq -2 WT_2_trim.fastq > mapped.sam
+samtools view -S -b mapped.sam > temp.bam
+samtools sort temp.bam -o mapped.bam
+samtools index -b mapped.bam
+bamCoverage -b mapped.bam -o T_thermophilus.bw -of bigwig -v --normalizeUsing CPM
+python tsstobed.py -i  thermus_merged_2014-04-03_00_46_46.s2 -o T_thermophilus_TSS.bed

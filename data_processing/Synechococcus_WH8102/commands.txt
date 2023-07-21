@@ -1,0 +1,26 @@
+trimmomatic SE -phred33 -threads 4 S_marenigrum_WH8102_5m.fastq S_marenigrum_WH8102_5m_trim.fastq -summary S_marenigrum_WH8102_5m_trimsummary ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+trimmomatic SE -phred33 -threads 4 S_marenigrum_WH8102_30m.fastq S_marenigrum_WH8102_30m_trim.fastq -summary S_marenigrum_WH8102_30m_trimsummary ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+trimmomatic SE -phred33 -threads 4 S_marenigrum_WH8102_60m.fastq S_marenigrum_WH8102_60m_trim.fastq -summary S_marenigrum_WH8102_60m_trimsummary ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+trimmomatic SE -phred33 -threads 4 S_marenigrum_WH8102_120m.fastq S_marenigrum_WH8102_120m_trim.fastq -summary S_marenigrum_WH8102_120m_trimsummary ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+bowtie-build GCF_000195975.1_ASM19597v1_genomic.fna indeks8
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks8 S_marenigrum_WH8102_5m_trim.fastq  > mapped8_5.sam
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks8 S_marenigrum_WH8102_30m_trim.fastq  > mapped8_30.sam
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks8 S_marenigrum_WH8102_60m_trim.fastq  > mapped8_60.sam
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks8 S_marenigrum_WH8102_120m_trim.fastq  > mapped8_120.sam
+samtools view -S -b mapped8_5.sam > temp.bam
+samtools sort temp.bam -o mapped8_5.bam
+samtools view -S -b mapped8_30.sam > temp.bam
+samtools sort temp.bam -o mapped8_30.bam
+samtools view -S -b mapped8_60.sam > temp.bam
+samtools sort temp.bam -o mapped8_60.bam
+samtools view -S -b mapped8_120.sam > temp.bam
+samtools sort temp.bam -o mapped8_120.bam
+samtools index -b mapped8_5.bam
+bamCoverage -b mapped8_5.bam -o Synechococcus_WH8102_5.bw -of bigwig -v --normalizeUsing CPM
+samtools index -b mapped8_30.bam
+bamCoverage -b mapped8_30.bam -o Synechococcus_WH8102_30.bw -of bigwig -v --normalizeUsing CPM
+samtools index -b mapped8_60.bam
+bamCoverage -b mapped8_60.bam -o Synechococcus_WH8102_60.bw -of bigwig -v --normalizeUsing CPM
+samtools index -b mapped8_120.bam
+bamCoverage -b mapped8_120.bam -o Synechococcus_WH8102_120.bw -of bigwig -v --normalizeUsing CPM
+python tsstobed.py -i s8102_TSS.s2 -o Synechococcus_WH8102_TSS.bed
