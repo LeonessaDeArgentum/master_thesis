@@ -1,0 +1,21 @@
+trimmomatic SE -phred33 -threads 4 pH_57.WT pH_57_WT_trim.fastq -summary C_acetobutylicum_pH57_trimsummary ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+trimmomatic SE -phred33 -threads 4 pH_45.WT pH_45_WT_trim.fastq -summary C_acetobutylicum_pH45_trimsummary ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+bowtie-build GCF_000008765.1_ASM876v1_genomic.fna indeks
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks pH_45_WT_trim.fastq > mapped_45.sam
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks pH_57_WT_trim.fastq > mapped_57.sam
+samtools view -S -b mapped_45.sam > temp.bam
+samtools sort temp.bam -o mapped_45.bam
+samtools index -b mapped_45.bam
+bamCoverage -b mapped_45.bam -o C_acetobutylicum_45.bw -of bigwig -v --normalizeUsing CPM
+python tsstobed.py -i  clo_ace_pH45_2014-04-03_00_46_46.s2 -o C_acetobutylicum_45_TSS.bed
+samtools view -S -b mapped_57.sam > temp.bam
+samtools sort temp.bam -o mapped_57.bam
+samtools index -b mapped_57.bam
+bamCoverage -b mapped_45.bam -o C_acetobutylicum_57.bw -of bigwig -v --normalizeUsing CPM
+python tsstobed.py -i  clo_ace_pH57_2014-04-03_00_46_46.s2 -o C_acetobutylicum_57_TSS.bed
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks merged.fastq > merged.sam
+samtools view -S -b merged.sam > temp.bam
+samtools sort temp.bam -o merged.bam
+samtools index -b merged.bam
+bamCoverage -b merged.bam -o C_acetobutylicum_merged.bw -of bigwig -v --normalizeUsing CPM
+python tsstobed.py -i  clo_ace_merged_2014-04-02_07_28_48.s2 -o C_acetobutylicum_merged_TSS.bed

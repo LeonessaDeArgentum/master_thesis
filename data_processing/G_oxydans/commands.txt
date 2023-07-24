@@ -1,0 +1,26 @@
+bowtie-build GCF_000011685.1_ASM1168v1_genomic.fna indeks
+
+----Mannitol:
+trimmomatic PE -phred33 G_oxydans_WT_1.fastq G_oxydans_WT_2.fastq G_oxydans_WT_1_trim.fastq drop1.fastq G_oxydans_WT_2_trim.fastq drop2.fastq -summary G_oxydans_mannitol_trimsummary ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks -1 G_oxydans_WT_1_trim.fastq -2 G_oxydans_WT_1_trim.fastq > mapped.sam
+samtools view -S -b mapped.sam > tempm.bam
+samtools sort tempm.bam -o mappedm.bam
+samtools index -b mappedm.bam
+bamCoverage -b mappedm.bam -o G_oxydans_mannitol.bw -of bigwig -v --normalizeUsing CPM
+python tsstobed.py -i glu_oxy_mannitol_2014-04-03_00_46_40.s2 -o G_oxydans_mannitol_TSS.bed
+
+----Glycerol:
+trimmomatic PE -phred33 G_oxydans_WT_1.txt G_oxydans_WT_2.txt G_oxydans_WT_1_trim.fastq drop1.fastq G_oxydans_WT_2_trim.fastq drop2.fastq -summary G_oxydans_glycerol_trimsummary ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks -1 G_oxydans_WT_1_trim.fastq -2 G_oxydans_WT_1_trim.fastq > mapped.sam
+samtools view -S -b mappedg.sam > tempg.bam
+samtools sort tempg.bam -o mappedg.bam
+samtools index -b mappedg.bam
+bamCoverage -b mappedg.bam -o G_oxydans_glycerol.bw -of bigwig -v --normalizeUsing CPM
+python tsstobed.py -i glu_oxy_glycerol_2014-04-03_00_46_40.s2 -o G_oxydans_glycerol_TSS.bed
+
+
+samtools merge mergedtemp.bam tempm.bam tempg.bam
+samtools sort mergedtemp.bam -o merged.bam
+samtools index -b merged.bam
+bamCoverage -b merged.bam -o G_oxydans_merged.bw -of bigwig -v --normalizeUsing CPM
+python tsstobed.py -i glu_oxy_merged_2014-04-03_00_46_40.s2 -o G_oxydans_merged_TSS.bed

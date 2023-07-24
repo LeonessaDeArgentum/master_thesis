@@ -1,0 +1,8 @@
+trimmomatic SE -phred33 -threads 4 bsu_TB_WT_.fastq bsu_TB_WT_trim.fastq -summary B_subtilis_trimsummary ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+bowtie-build GCF_000009045.1_ASM904v1_genomic.fna indeks
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks bsu_TB_WT_trim.fastq > mapped.sam
+samtools view -S -b mapped.sam > temp.bam
+samtools sort temp.bam -o mapped.bam
+samtools index -b mapped.bam
+bamCoverage -b mapped.bam -o B_subtilis.bw -of bigwig -v --normalizeUsing CPM
+python tsstobed.py -i B_sub_rich_media_2014-04-22_19_47_53.s2 -o B_subtils_TSS.bed

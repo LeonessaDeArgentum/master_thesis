@@ -1,0 +1,7 @@
+trimmomatic SE -phred33 -threads 4 Ecoli_WT.fastq Ecoli_WT_trim.fastq -summary E_coli_trimsummary ILLUMINACLIP:adaptery_illumina.txt:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+bowtie -p 20 -l 20 --sam --best --strata -m 1 -x indeks Ecoli_WT_trim.fastq > mapped.sam
+samtools view -S -b mapped.sam > temp.bam
+samtools sort temp.bam -o mapped.bam
+samtools index -b mapped.bam
+bamCoverage -b mapped.bam -o E_coli.bw -of bigwig -v --normalizeUsing CPM
+
